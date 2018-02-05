@@ -16,7 +16,7 @@ install:
 jobs:
   include:
     - stage: Test builds
-      env: OPTS="LIBNAME=lib64 LIBEXECDIR=/lib64/rc MKNET=no MKSELINUX=no MKAUDIT=no MKPAM=no MKSTATICLIBS=no OS=Linux"
+      env: OPTS="LIBNAME=lib64 LIBEXECDIR=/lib64/rc MKNET=no MKSELINUX=no MKAUDIT=no MKSTATICLIBS=no OS=Linux"
     - env: OPTS="LIBNAME=lib64 LIBEXECDIR=/lib64/rc MKNET=no MKSELINUX=no MKAUDIT=no MKPAM=pam MKSTATICLIBS=no OS=Linux"
     - stage: Coverity
       env:
