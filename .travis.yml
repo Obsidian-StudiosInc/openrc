@@ -1,0 +1,39 @@
+language: c
+compiler: gcc
+sudo: required
+dist: trusty
+env:
+  global:
+    - MY_PV=0.34.11
+
+before_install:
+  - if [ "${COVERITY_SCAN_BRANCH}" = "1" ]; then echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt ; fi
+
+install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libc6-dbg libpam0g-dev
+
+jobs:
+  include:
+    - stage: Test builds
+      env: OPTS="LIBNAME=lib64 LIBEXECDIR=/lib64/rc MKNET=no MKSELINUX=no MKAUDIT=no MKPAM=no MKSTATICLIBS=no OS=Linux"
+      env: OPTS="LIBNAME=lib64 LIBEXECDIR=/lib64/rc MKNET=no MKSELINUX=no MKAUDIT=no MKPAM=pam MKSTATICLIBS=no OS=Linux"
+    - stage: Coverity
+      env:
+        - secure: JxslW0YBh64wvVSvsM2s/1Z3XmTR70sCS4JhZhloY9X+pHuk2YtRrlcdrd/D2VfvlhCOXNt50Zl/Ae70CazEzCIvrJLBva1wwMn68EUMCnKDsaV03XD+VvbOeIyBKY4DQHsgjWtnZUBqLWnmX1Aox0ve0wXTMDBsYgQkUDkIv56OPbIfighz/2h0gQ3nCarbrQI1FzkG2gbP7ugc83UM+jUufN8NcPzgS9VNbwPL5FbMv5XXrOsw2xt84/+pC46NAnKoes1C5VA+/ZakzaAEsE0dTa7GTjS/P43ewyhvApGFnSPED57zpBZQK/UadVmo7uVzpBpFypvEq7DgRXI2QNH7OBhipg6RFCWTCRvMh7lOXzKNHnAN2tSaV1ZqjxglQei9/mQFClkASoNMQvZ/eOutK+DCYGIN5xm8RqkGPmVreLwG0ZbpFkT4VBCCpelhTC4Pb2EhwSJCaR2kxt08N2jz7pzNV2EzMN8v7SLJLJJS4tEdq1eo4jw2phv6fWGjAHmcBWAEIEo6oprQP38vikJ9e7PFwqjIY2xSzUnORfc/OQ8WsLUA08mQ+deMyqCEHRvtPGUtegohc7VslhtjHtQfECDxInCBZlHGyXqYioaPfxeGdmzpQlyGVAcFIhofafrx5k8RcHhte0f4qzeVao/IE83vLy7RDntm37U+eCk=
+        - OPTS="LIBNAME=lib64 LIBEXECDIR=/lib64/rc MKNET=no MKSELINUX=no MKAUDIT=no MKPAM=pam MKSTATICLIBS=no OS=Linux"
+      addons:
+        coverity_scan:
+          project:
+            name: Obsidian-StudiosInc/openrc
+            description: Build submitted via Travis CI
+          notification_email: wlt@o-sinc.com
+          build_command_prepend: make clean
+          build_command: make ${OPTS} -j4
+          branch_pattern: master
+
+script:
+  - if [ "${COVERITY_SCAN_BRANCH}" = "1" ]; then true; else make ${OPTS}; fi
+
+notifications:
+  email: false
