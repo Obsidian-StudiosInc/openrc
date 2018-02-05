@@ -6,9 +6,6 @@ env:
   global:
     - MY_PV=0.34.11
 
-before_install:
-  - if [ "${COVERITY_SCAN_BRANCH}" = "1" ]; then echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt ; fi
-
 install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libc6-dbg libpam0g-dev
@@ -18,22 +15,18 @@ jobs:
     - stage: Test builds
       env: OPTS="LIBNAME=lib64 LIBEXECDIR=/lib64/rc MKNET=no MKSELINUX=no MKAUDIT=no MKSTATICLIBS=no OS=Linux"
     - env: OPTS="LIBNAME=lib64 LIBEXECDIR=/lib64/rc MKNET=no MKSELINUX=no MKAUDIT=no MKPAM=pam MKSTATICLIBS=no OS=Linux"
-    - stage: Coverity
+    - stage: SonarCloud
       env:
-        - secure: JxslW0YBh64wvVSvsM2s/1Z3XmTR70sCS4JhZhloY9X+pHuk2YtRrlcdrd/D2VfvlhCOXNt50Zl/Ae70CazEzCIvrJLBva1wwMn68EUMCnKDsaV03XD+VvbOeIyBKY4DQHsgjWtnZUBqLWnmX1Aox0ve0wXTMDBsYgQkUDkIv56OPbIfighz/2h0gQ3nCarbrQI1FzkG2gbP7ugc83UM+jUufN8NcPzgS9VNbwPL5FbMv5XXrOsw2xt84/+pC46NAnKoes1C5VA+/ZakzaAEsE0dTa7GTjS/P43ewyhvApGFnSPED57zpBZQK/UadVmo7uVzpBpFypvEq7DgRXI2QNH7OBhipg6RFCWTCRvMh7lOXzKNHnAN2tSaV1ZqjxglQei9/mQFClkASoNMQvZ/eOutK+DCYGIN5xm8RqkGPmVreLwG0ZbpFkT4VBCCpelhTC4Pb2EhwSJCaR2kxt08N2jz7pzNV2EzMN8v7SLJLJJS4tEdq1eo4jw2phv6fWGjAHmcBWAEIEo6oprQP38vikJ9e7PFwqjIY2xSzUnORfc/OQ8WsLUA08mQ+deMyqCEHRvtPGUtegohc7VslhtjHtQfECDxInCBZlHGyXqYioaPfxeGdmzpQlyGVAcFIhofafrx5k8RcHhte0f4qzeVao/IE83vLy7RDntm37U+eCk=
         - OPTS="LIBNAME=lib64 LIBEXECDIR=/lib64/rc MKNET=no MKSELINUX=no MKAUDIT=no MKPAM=pam MKSTATICLIBS=no OS=Linux"
       addons:
-        coverity_scan:
-          project:
-            name: Obsidian-StudiosInc/openrc
-            description: Build submitted via Travis CI
-          notification_email: wlt@o-sinc.com
-          build_command_prepend: make clean
-          build_command: make ${OPTS} -j4
-          branch_pattern: master
+        sonarcloud:
+          organization: obsidian-studiosinc-github
+          token:
+            secure: vp0M4v4YgiL14a7K5tEPJWv3JEt3js3EQWSSFmvx4DU783dCVfPIfqAxEP9NwCmxUSBnUunE+gE9L5KeNEvOBYmVqu0s3ik04G8L3HPFZNLtPVPYmR/VYGUiAQNKfU49ufbJDDL1NI5+QTbld2LLXgUcUyH3EEh4qnRWgi5m77ulz17YOjpyFxObf8Z7JdkrgaEUO14Zq2Fk/NOZaeUhhF03VA/S6wCFtDAEDWw3ejVZJypw63vW6cYpiQrqFEFSOr7sPdrXB0MJcaIBOnnBqUtBhyyQfoLVSWcVLkmYR1DshqW4vw64AyUdaFw9DnJyCu0jeZa2Z33Oh2S+MneT2PTooKl4j84kjAh0ADLI0ptKncJ1tD+NxHTfB7W+ThHhWbtP7HBofM+W7e6RHGYhDKhvzMgSviIK37l26wTZEzcSkG8gPp26IgP/m78Bila1vNMTC7HZLg1WKCzKOeeCiIXTJamjAWYM20XmY4j2gdjrWxBVcHvjldNjhKbsEczgZscNE06ATuM0Gfqf+mbFNhsUgQICr30PnsDL8VnC3ACULetyftb9jckfIxjJuM5/gkhdyAUOfIfLJAHr4//BxhlIpclMgFsKjLzBnTs1nsNqoYIpJc5nri+iZQXdiBLzV1kVCw2OjDoi9SR+8r6cpBNeYfgkeeIsoshbyLx1N30=
 
 script:
-  - if [ "${COVERITY_SCAN_BRANCH}" = "1" ]; then true; else make ${OPTS}; fi
+  - make ${OPTS}
+  - sonar-scanner
 
 notifications:
   email: false
