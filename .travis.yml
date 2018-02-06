@@ -2,6 +2,11 @@ language: c
 compiler: gcc
 sudo: required
 dist: trusty
+
+cache:
+  directories:
+    - $HOME/.sonar/cache
+
 env:
   global:
     - MY_PV=0.34.11
@@ -18,6 +23,7 @@ jobs:
     - stage: SonarCloud
       env:
         - OPTS="LIBNAME=lib64 LIBEXECDIR=/lib64/rc MKNET=no MKSELINUX=no MKAUDIT=no MKPAM=pam MKSTATICLIBS=no OS=Linux"
+        - SONAR="0"
       addons:
         sonarcloud:
           organization: obsidian-studiosinc-github
@@ -25,8 +31,8 @@ jobs:
             secure: vp0M4v4YgiL14a7K5tEPJWv3JEt3js3EQWSSFmvx4DU783dCVfPIfqAxEP9NwCmxUSBnUunE+gE9L5KeNEvOBYmVqu0s3ik04G8L3HPFZNLtPVPYmR/VYGUiAQNKfU49ufbJDDL1NI5+QTbld2LLXgUcUyH3EEh4qnRWgi5m77ulz17YOjpyFxObf8Z7JdkrgaEUO14Zq2Fk/NOZaeUhhF03VA/S6wCFtDAEDWw3ejVZJypw63vW6cYpiQrqFEFSOr7sPdrXB0MJcaIBOnnBqUtBhyyQfoLVSWcVLkmYR1DshqW4vw64AyUdaFw9DnJyCu0jeZa2Z33Oh2S+MneT2PTooKl4j84kjAh0ADLI0ptKncJ1tD+NxHTfB7W+ThHhWbtP7HBofM+W7e6RHGYhDKhvzMgSviIK37l26wTZEzcSkG8gPp26IgP/m78Bila1vNMTC7HZLg1WKCzKOeeCiIXTJamjAWYM20XmY4j2gdjrWxBVcHvjldNjhKbsEczgZscNE06ATuM0Gfqf+mbFNhsUgQICr30PnsDL8VnC3ACULetyftb9jckfIxjJuM5/gkhdyAUOfIfLJAHr4//BxhlIpclMgFsKjLzBnTs1nsNqoYIpJc5nri+iZQXdiBLzV1kVCw2OjDoi9SR+8r6cpBNeYfgkeeIsoshbyLx1N30=
 
 script:
-  - make ${OPTS}
-  - sonar-scanner
+  - if [ "${SONAR}" = "0" ]; then build-wrapper-linux-x86-64 --out-dir bw-output make ${OPTS}; fi
+  - if [ "${SONAR}" = "0" ]; then sonar-scanner; else make ${OPTS} ; fi
 
 notifications:
   email: false
